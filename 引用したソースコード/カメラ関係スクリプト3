@@ -1,0 +1,85 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class camera_di : MonoBehaviour
+{
+    private Transform CamPos;
+    CharacterController controller;
+    private CharacterController charaCon;
+    Vector3 moveDirection;
+    public float idoSpeed = 5.0f;
+    public float gravity = 20.0F;
+    float fSpeed = 3.0f;
+    public float direction = 5.0f;
+    private Animator animCon;
+    public float kaitenSpeed = 1200.0f;
+    
+    public DynamicJoystick joystick;
+    void Start()
+    {
+        animCon = GetComponent<Animator>(); // アニメーターのコンポーネントを参照する
+        var cameraForward = Vector3.Scale(Camera.main.transform.forward, new Vector3(1, 0, 1)).normalized;  //  カメラが追従するための動作
+        Vector3 direction = cameraForward * joystick.Vertical + Camera.main.transform.right * joystick.Horizontal;  //  テンキーや3Dスティックの入力（GetAxis）があるとdirectionに値を返す
+        charaCon = GetComponent<CharacterController>();
+        CamPos = Camera.main.transform;
+        controller = GetComponent("CharacterController") as CharacterController;
+    }
+
+    void Update()
+    {
+        float x = joystick.Horizontal;
+        float z = joystick.Vertical;
+        Vector3 forward = Camera.main.transform.TransformDirection(Vector3.forward);
+        Vector3 right = Camera.main.transform.TransformDirection(Vector3.right);
+        moveDirection = joystick.Horizontal * right + joystick.Vertical * forward;
+        moveDirection *= fSpeed;
+
+        // 移動 
+        var cameraForward = Vector3.Scale(Camera.main.transform.forward, new Vector3(1, 0, 1)).normalized;  //  カメラが追従するための動作
+        Vector3 direction = cameraForward * joystick.Vertical + Camera.main.transform.right * joystick.Horizontal;  //  テンキーや3Dスティックの入力（GetAxis）があるとdirectionに値を返す
+
+
+        // ▼▼▼移動処理▼▼▼
+        charaCon.Move(moveDirection * Time.deltaTime);  //CharacterControllerの付いているこのオブジェクトを移動させる処理
+
+        if (joystick.Vertical == 0 && joystick.Horizontal == 0)  //  テンキーや3Dスティックの入力（GetAxis）がゼロの時の動作
+        {
+            animCon.SetBool("Run", false);  //  Runモーションしない
+        }
+
+        else //  テンキーや3Dスティックの入力（GetAxis）がゼロではない時の動作
+        {
+            MukiWoKaeru(direction);  //  向きを変える動作の処理を実行する（後述）
+            animCon.SetBool("Run", true);  //  Runモーションする
+        }
+
+
+        // ▼▼▼落下処理▼▼▼
+        if (charaCon.isGrounded)    //CharacterControllerの付いているこのオブジェクトが接地している場合の処理
+        {
+            moveDirection.y = 0f;  //Y方向への速度をゼロにする
+            moveDirection = direction * idoSpeed;  //移動スピードを向いている方向に与える
+        }
+        else  //CharacterControllerの付いているこのオブジェクトが接地していない場合の処理
+        {
+            moveDirection.y -= gravity * Time.deltaTime;  //マイナスのY方向（下向き）に重力を与える
+        }
+
+
+        // ▼▼▼アクション処理▼▼▼
+        animCon.SetBool("Action", Input.GetKey("x") || Input.GetButtonDown("Action1"));  //  キーorボタンを押したらアクションを実行
+        animCon.SetBool("Action2", Input.GetKey("z") || Input.GetButtonDown("Action2"));  //  キーorボタンを押したらアクション2を実行
+        animCon.SetBool("Action3", Input.GetKey("c") || Input.GetButtonDown("Action3"));  //  キーorボタンを押したらアクション3を実行
+                                                                                          //        animCon.SetBool("Jump", Input.GetKey("space") || Input.GetButtonDown("Jump"));  //  キーorボタンを押したらジャンプを実行（仮）
+    }
+
+
+    // ■向きを変える動作の処理
+    void MukiWoKaeru(Vector3 mukitaiHoukou)
+    {
+        Quaternion q = Quaternion.LookRotation(mukitaiHoukou);          // 向きたい方角をQuaternion型に直す
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, q, kaitenSpeed * Time.deltaTime);   // 向きを q に向けてじわ～っと変化させる.
+    }
+}
+
