@@ -1,0 +1,96 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class run : MonoBehaviour
+{
+
+    private Animator animator;///Animatorコンポーネント
+    public DynamicJoystick joystick;///仮想スティック
+
+    // Use this for initialization
+    void Start()
+    {
+        animator = GetComponent<Animator>();///Animatorコンポーネント取得
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+        
+        float x = joystick.Horizontal;///X軸方向のジョイスティックの向きを取得
+        float y = joystick.Vertical;///Y軸方向のジョイスティックの向きを取得
+
+        Physics.gravity = new Vector3(0, -981f, 0);///Y軸の重力を-981fに変更
+
+
+        if (x == 1.0f) //Joystickが右側方向に傾くと右に進む
+        {
+            animator.SetFloat("is", x);
+        }
+        else
+        {
+            animator.SetFloat("is", x);
+        }
+
+
+        
+        if (x == -1.0f)//Joystick左側方向に傾くと左に進む
+        {
+            animator.SetFloat("is", x);
+        }
+
+        else
+        {
+            animator.SetFloat("is", x);
+        }
+
+
+        if (y>0|y<0)
+        {
+            GetComponent<yrun>().enabled = true;
+            GetComponent<run>().enabled = false;
+        }
+
+        /*
+        if (Input.GetKey(KeyCode.W))
+        {
+
+            animator.SetBool("is_running", true);
+        }
+        else
+        {
+            animator.SetBool("is_running", false);
+        }
+        if (Input.GetKey(KeyCode.D))
+
+        {
+            animator.SetBool("R_RUN", true);
+        }
+        else
+        {
+            animator.SetBool("R_RUN", false);
+        }
+
+        if (Input.GetKey(KeyCode.A))
+        {
+            animator.SetBool("L_RUN", true);
+        }
+        else
+        {
+            animator.SetBool("L_RUN", false);
+        }
+
+        if (Input.GetKey(KeyCode.S))
+        {
+            animator.SetBool("B_RUN", true);
+        }
+        else
+        {
+            animator.SetBool("B_RUN", false);
+        }
+        */
+    }
+}
+
