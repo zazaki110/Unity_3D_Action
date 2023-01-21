@@ -1,0 +1,226 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class attack_system : MonoBehaviour
+{
+    public Animator animator;///Animatorコンポーネント
+    public bool コンボアタック制御 = false;//コンボ時にボタンの連続入力を制限する
+    public float コンボ受付時間 = 0.5f;///コンボボタンの入力制限時間　0.5秒以内に攻撃中にボタンを押さないと次の攻撃に移行しない
+    public int Stop = 1;
+    public int スマホbutton入力受付 = 0;///ここの値で攻撃モーションの種類を変える
+    public GameObject アタックボタン;///仮想ボタン
+    public GameObject Right_Wepon;///右手の武器
+    public GameObject left_Wepon;///左手の武器
+    public AudioSource sound01;///剣を振る音
+    // Start is called before the first frame update
+    void Start()
+    {
+        animator = GetComponent<Animator>();///シーン開始直後にAnimatorを変数に格納する
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (スマホbutton入力受付 == 0)///攻撃モーションattack1再生
+        {
+            スマホbutton入力受付 = -1;
+            animator.SetTrigger("attack1");
+
+        }
+
+        if (コンボアタック制御 == true)
+        {
+            コンボ受付時間 -= Time.deltaTime * Stop;//0.5秒以内にボタンを押すことによってコンボ攻撃に繋がる
+            Debug.Log("スマホコルーチン成功1");
+            if (スマホbutton入力受付 == 1)///攻撃モーションattack2再生
+
+            {
+                Debug.Log("スマホコルーチン成功2");
+                animator.ResetTrigger("attack1");
+                animator.ResetTrigger("attack3");
+                animator.SetTrigger("attack2");
+                Stop = 0;
+            }
+
+            if (スマホbutton入力受付 == 2)
+
+            {
+                Debug.Log("スマホコルーチン成功3");
+                animator.ResetTrigger("attack1");
+                animator.ResetTrigger("attack2");
+                animator.SetTrigger("attack3");
+                Stop = 0;
+            }
+
+            if (コンボ受付時間 < 0)
+            {
+
+
+                コンボアタック制御 = false;
+            }
+        }
+
+
+
+
+
+
+
+        if (Input.GetMouseButtonDown(-9))
+        {
+            animator.SetTrigger("attack1");
+        }
+
+        if (コンボアタック制御 == true)
+        {
+            コンボ受付時間 -= Time.deltaTime * Stop;
+            Debug.Log("コルーチン成功1");
+            if (Input.GetMouseButtonDown(1))
+
+            {
+                animator.SetTrigger("attack2");//////attack1をコンボ用のトリガーとして使用する。
+                Stop = 0;
+            }
+            if (コンボ受付時間 < 0)
+            {
+
+
+                コンボアタック制御 = false;
+            }
+        }
+    }
+
+
+    void Player_sword_sound()//攻撃音再生
+    {
+        sound01.PlayOneShot(sound01.clip);
+    }
+
+
+    void left_wepons_Box_collider_Player2attack_true()//この関数を実行時武器のタグ名が変更され当たり判定ができる
+    {
+        left_Wepon.tag = "Player_attack2";
+        left_Wepon.GetComponent<BoxCollider>().center = new Vector3(6.1f, 0.1f, 83.84f);
+        left_Wepon.GetComponent<BoxCollider>().size = new Vector3(26f, 15f, 185f);
+        left_Wepon.GetComponent<BoxCollider>().enabled = true;
+    }
+
+    void left_wepons_Box_collider_Player2attack_false()//この関数を実行時武器のタグ名が変更され当たり判定が消える
+    {
+        left_Wepon.tag = "null";
+        left_Wepon.GetComponent<BoxCollider>().center = new Vector3(6.1f, 0f, 15.9f);
+        left_Wepon.GetComponent<BoxCollider>().size = new Vector3(6.3f, 11.6f, 98.2f);
+        left_Wepon.GetComponent<BoxCollider>().enabled = false;
+    }
+
+
+
+
+
+
+    void right_wepons_Box_collider_size_center_on()
+    {
+        Right_Wepon.GetComponent<BoxCollider>().center = new Vector3(6.1f, 0f, 71.9f);
+        Right_Wepon.GetComponent<BoxCollider>().size = new Vector3(20.3f, 33.7f, 184.9f);
+
+    }
+
+
+
+    void right_wepons_Box_collider_true()
+    {
+        Right_Wepon.tag = "Player_attack1";
+        Right_Wepon.GetComponent<BoxCollider>().enabled = true;
+
+    }
+
+    void right_wepons_Box_collider_false()
+    {
+        Right_Wepon.GetComponent<BoxCollider>().center = new Vector3(6.1f, 0f, 17.9f);
+        Right_Wepon.GetComponent<BoxCollider>().size = new Vector3(6.3f, 11.6f, 98.3f);
+        Right_Wepon.tag = "null";
+        Right_Wepon.GetComponent<BoxCollider>().enabled = false;
+
+    }
+
+
+
+
+
+    void left_wepons_Box_collider_true()
+    {
+        left_Wepon.tag = "Player_attack1";
+        left_Wepon.GetComponent<BoxCollider>().enabled = true;
+
+    }
+
+
+    void left_wepons_Box_collider_false()
+    {
+        left_Wepon.tag = "null";
+        left_Wepon.GetComponent<BoxCollider>().enabled = false;
+
+    }
+
+
+
+
+
+
+    IEnumerator combo_attack2_cor()
+    {
+        yield return new WaitForSeconds(0f);
+        Debug.Log("コルーチン成功");
+        コンボアタック制御 = true;
+
+    }
+
+    void attack_exit()
+    {
+        if (コンボアタック制御 == false)///コンボ制御falseならそのまま攻撃を終了する
+        {
+            Debug.Log("コンボ制御false");
+            animator.SetTrigger("exit");
+
+
+        }
+
+    }
+
+
+    void combo_attack2()///アタックコンボ2連撃目
+    {
+
+        StartCoroutine("combo_attack2_cor");
+        アタックボタン.GetComponent<attack_button>().StartCoroutine("combo_count1");
+        Debug.Log("コンボ制御");
+    }
+
+    void combo_attack3()///アタックコンボ3連撃目
+    {
+
+        StartCoroutine("combo_attack2_cor");
+        アタックボタン.GetComponent<attack_button>().StartCoroutine("combo_count2");
+        Debug.Log("コンボ制御");
+    }
+
+
+
+    void idle()///プレイヤーモーションがidleになった時に実行される
+    {
+        animator.ResetTrigger("attack1");
+        animator.ResetTrigger("attack2");
+        animator.ResetTrigger("attack3");
+        Debug.Log("idle");
+        コンボアタック制御 = false;
+        コンボ受付時間 = 0.5f;
+        Stop = 1;
+        アタックボタン.GetComponent<attack_button>().コンボ入力受付 = 0;
+
+    }
+}
+
+
+
+
