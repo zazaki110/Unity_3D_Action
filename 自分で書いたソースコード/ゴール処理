@@ -1,0 +1,21 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Goal_generation : MonoBehaviour
+{
+    public GameObject[] Goals;
+    public int Goal_number;
+    // Start is called before the first frame update
+    void Start()////ゲーム開始時ゴール地点をランダムに変更する
+    {
+        Goal_number=Random.Range(0, 9);
+        Goals[Goal_number].tag = "Goal";
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+}
