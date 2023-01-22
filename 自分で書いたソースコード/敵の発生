@@ -1,0 +1,132 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.AI;
+public class Enemy_Appearance : MonoBehaviour
+{
+    // Start is called before the first frame update
+    public Vector3 pos;
+    public Transform Tr;
+    public GameObject[] summon_pos;
+    public GameObject[] Enemys;
+    public GameObject[] walls;
+    public GameObject particle;
+    public int Enemy_switch_judgement;
+    public int number_of_enemies;///エネミーを倒す数
+    void Start()
+    {
+        this.tag = "null";
+        particle.GetComponent<ParticleSystem>().Stop();
+        pos = transform.position;
+        Tr = this.transform;
+    }
+    void OnTriggerEnter(Collider col)///プレイヤーが敵発生スイッチに触れたら
+    {
+        if (this.gameObject.name == "敵発生スイッチ")
+        {
+            Enemy_switch_judgement = Random.Range(0, 3);
+            GetComponent<BoxCollider>().enabled = false;
+            if (Enemy_switch_judgement == 1)
+            {
+                this.tag = "Enemy_occurrence_switch";
+                GetComponent<BoxCollider>().enabled = false;
+                walls[0].GetComponent<MeshRenderer>().enabled = true;
+                walls[1].GetComponent<MeshRenderer>().enabled = true;
+                walls[0].GetComponent<BoxCollider>().enabled = true;
+                walls[1].GetComponent<BoxCollider>().enabled = true;
+                walls[0].GetComponent<NavMeshObstacle>().enabled = true;
+                walls[1].GetComponent<NavMeshObstacle>().enabled = true;
+                if (col.gameObject.tag == "Player_Hit")
+                {
+                    for (int i = 0; i < 7; i++)///ループ文でエネミーを7体召喚する
+                    {
+                        summon_pos[i].GetComponent<Enemy_Appearance>().Enemy_Summon();
+                    }
+                }
+            }
+            else
+            
+            {
+                StartCoroutine("Reset_Switch");
+            }
+        }
+    }
+
+
+
+    IEnumerator Reset_Switch()
+    {
+        yield return new WaitForSeconds(10f);
+        this.tag = "null";
+        number_of_enemies = 7;
+        GetComponent<BoxCollider>().enabled = true;
+    }
+
+
+
+
+    public void Enemy_defeat()////エネミーが指定数倒されたら
+    {
+        number_of_enemies--;
+        if (number_of_enemies == 0)
+        {
+            for (int i = 0; i < 7; i++)///ループ文でエネミーを7体召喚する
+            {
+                summon_pos[i].GetComponent<Enemy_Appearance>().pos.y = 0f;
+            }
+            walls[0].GetComponent<BoxCollider>().enabled = false;
+            walls[1].GetComponent<BoxCollider>().enabled = false;
+            walls[0].GetComponent<MeshRenderer>().enabled = false;
+            walls[1].GetComponent<MeshRenderer>().enabled = false;
+            walls[0].GetComponent<NavMeshObstacle>().enabled = false;
+            walls[1].GetComponent<NavMeshObstacle>().enabled = false;
+            StartCoroutine("Reset_Switch");
+        }
+    }
+
+
+
+
+    public void Enemy_Summon()/////ループの回数に応じてこの関数を実行する
+    {
+        particle.GetComponent<ParticleSystem>().Play();
+        int Enemy_hantei = UnityEngine.Random.Range(0, 3);
+        var obj = Instantiate(Enemys[Enemy_hantei]);
+        obj.GetComponent<enemy_status>().risupon_Initialization();///エネミーを召喚したらこの関数を実行してエネミーのステータスをリセットする
+        obj.transform.parent = this.transform;
+        var obj_Enemy = transform.GetChild(0).gameObject;
+        obj_Enemy.transform.localPosition = new Vector3(0f, 0f, 0f);
+        obj_Enemy.GetComponent<Animator>().enabled = false;
+        obj_Enemy.GetComponent<Animator>().enabled = true;
+        StartCoroutine("FloorMove");
+    }
+
+
+
+    IEnumerator FloorMove()
+    {
+        while (pos.y < 2.5f)
+        {
+            pos = transform.position;
+            transform.Translate(0, 0.02f, 0);
+            yield return new WaitForSeconds(0.01f);
+
+            if (pos.y > 2.5f)
+            {
+                var obj_Enemy = transform.GetChild(0).gameObject;
+                obj_Enemy.GetComponent<enemy_status>().enabled = true;
+                obj_Enemy.GetComponent<NavMeshAgent>().enabled = true;
+                obj_Enemy.GetComponent<enemy_status>().risupon_Initialization();
+                particle.GetComponent<ParticleSystem>().Stop();
+                transform.GetChild(0).gameObject.transform.parent = null;
+                transform.localPosition = new Vector3(0f, -4.14f, 0f);
+            }
+        }
+    }
+
+    public void PosY_reset()
+    {
+        pos.y = 0f;
+
+    }
+}
