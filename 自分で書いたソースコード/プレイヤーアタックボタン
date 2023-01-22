@@ -1,0 +1,57 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+public class attack_button : MonoBehaviour
+{
+    public Animator animator;
+    public bool コンボアタック制御 = false;
+    public float コンボ受付時間 = 0.5f;
+    public int Stop = 1;
+    public GameObject Player;
+    public int コンボ入力受付 = 0;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        animator = Player.GetComponent<Animator>();
+    }
+
+    IEnumerator combo_count1()
+    {
+        yield return new WaitForSeconds(0.1f);
+        コンボ入力受付 = 1;
+    }
+    IEnumerator combo_count2()
+    {
+        yield return new WaitForSeconds(0.1f);
+        コンボ入力受付 = 2;
+    }
+    IEnumerator combo_count3()
+    {
+        yield return new WaitForSeconds(0.1f);
+        コンボ入力受付 = 3;
+    }
+    public void OnClick()
+    {
+        if (コンボ入力受付 == 0)
+        {
+            コンボ入力受付 = -1;
+            Player.GetComponent<attack_system>().スマホbutton入力受付 = 0;
+        }
+
+        if (コンボ入力受付 == 1)
+        { 
+            Player.GetComponent<attack_system>().スマホbutton入力受付 = 1; 
+        }
+
+        if (コンボ入力受付 == 2)
+        {
+            Player.GetComponent<attack_system>().スマホbutton入力受付 = 2;
+            StartCoroutine("combo_count3");
+        }
+        
+
+    }
+
+}
