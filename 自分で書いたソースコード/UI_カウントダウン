@@ -1,0 +1,43 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+public class Tim_limit : MonoBehaviour
+{
+    public Text タイマー;
+    public float countdown = 5.0f;
+    public GameObject Player_Unitychan;///プレイヤーオブジェクト
+    public bool ispose = true;
+    // Start is called before the first frame update
+    void Start()
+    {
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        {
+            if (ispose == true)
+            {
+                countdown -= Time.deltaTime;
+                タイマー.text = countdown.ToString("F2");
+                if (countdown < 0)
+                {
+                    タイマー.text = "終了!!";
+                    Player_Unitychan.GetComponent<Player_status>().Player_Time_out();///プレイヤーのPlayer_statusの関数を実行
+                    StartCoroutine("result");
+                    ispose = false;
+                }
+            }
+        }
+    }
+
+    IEnumerator result()///////残り時間が0になった場合
+    {
+        yield return new WaitForSeconds(7f);
+        SceneManager.LoadScene("ポートフォリオリザルト画面");
+        
+    }
+}
