@@ -1,0 +1,43 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+public class result_screen : MonoBehaviour
+{
+
+    public int a;
+    public int b;
+    public int c;
+    public Text MAX_score;
+    public Text MAX_kill_enemy;
+    public Text MAX_Coin;
+    // Start is called before the first frame update
+    void Start()
+    {
+        a = Player_status.getA();///Maxkillcount数
+        b = Player_status.getB();///MAx_score数
+        c = Player_status.getC();///Max_coins
+        MAX_score.text = b.ToString();
+        MAX_kill_enemy.text = a.ToString();
+        MAX_Coin.text=c.ToString();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+       
+}
+
+    public void OnClick()
+    {
+        Player_status.Max_score_count = 0;
+        Player_status.Max_Coins = 0;
+        Player_status.Max_kill_count = 0;
+        SceneManager.LoadScene("5-13-2");
+    }
+    public void OnClick_ranking()
+    {
+        SceneManager.LoadScene("score_board");
+    }
+}
