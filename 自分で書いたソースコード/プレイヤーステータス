@@ -1,0 +1,262 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+public class Player_status : MonoBehaviour
+{
+    public Text kill_count_UI;
+    public int kill_count;
+    public int score_count;
+    public Text score_count_UI;
+    public bool score_update;
+    public bool coin_update;
+    public static int Max_kill_count;///総合キル数
+    public static int Max_score_count;///総合スコア数
+    public static int SPlayerHP;
+    public int PlayerHP;
+    public int Coins;
+    public static int Max_Coins;
+    public Text Coin_UI;
+    public AudioSource[] soundSE;
+    public Tim_limit tim_limit;
+    private Animator animator;
+    public GameObject Right_Weapon;///右手の武器
+    public GameObject Left_Weapon;///左手の武器
+    public int Enemys_voice_count;
+    public int Enemys_voice_count_1;
+    public Slider Player_HP_Bar;
+    public GameObject[] rispons;
+    public GameObject Main_camera;
+    public AudioClip BGM;
+    public AudioSource[] Audio;
+    // Start is called before the first frame update
+
+
+
+    void Awake()///ゲーム開始直後にプレイヤーの初期位置を決める
+    {
+        int Ris_Numbar = Random.Range(0, 6);///ここの値で開始地点をランダムで決める
+        var Ris_pos = rispons[Ris_Numbar].transform.localPosition;
+        this.transform.localPosition = Ris_pos;
+
+    }
+
+    void Start()
+    {
+        int BGM_Numbar = Random.Range(0, 3);///ここの値でBGMをランダムに決める
+        Main_camera.transform.parent = null;
+        animator = GetComponent<Animator>();
+        Audio[BGM_Numbar].Play();
+        
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (score_update == true)///敵を倒す度にUIを更新する
+        {
+            Max_kill_count = kill_count;
+            Max_score_count = score_count;
+            kill_count_UI.text = kill_count.ToString();
+            score_count_UI.text = score_count.ToString();
+            score_update = false;
+        }
+        if (coin_update == true)///コインを拾う度に更新
+        {
+            Max_Coins = Coins;
+            Coin_UI.text = Coins.ToString();
+            coin_update = false;
+        }
+    }
+    void OnTriggerEnter(Collider col)
+    {
+
+
+        if (col.gameObject.tag == "Enemy_attack1")///敵から攻撃を受けた処理
+        {
+
+            if (PlayerHP < 1)///HPが0以下になった時
+            {
+                Right_Weapon.GetComponent<MeshRenderer>().enabled = false;
+                Left_Weapon.GetComponent<MeshRenderer>().enabled = false;
+                GameObject.FindGameObjectWithTag("GameOver_UI_text").GetComponent<Text>().enabled = true;
+                GetComponent<CharacterController>().enabled = false;
+                SPlayerHP = 0;
+                GetComponent<yrun>().enabled = false;
+                animator.SetFloat("is", 0f);
+                animator.SetTrigger("exit");
+                animator.SetTrigger("HP0_Death");
+                GetComponent<camera_di>().enabled = false;
+                GetComponent<run>().enabled = false;
+                GetComponent<attack_system>().enabled = false;
+                StartCoroutine("Player_Death");
+
+            }
+        }
+
+
+        
+        if (col.gameObject.tag == "Coin_GOLD")///coinタグに触れた処理
+        {
+            soundSE[0].PlayOneShot(soundSE[0].clip);
+            Coins = Coins + 1;
+            tim_limit.GetComponent<Tim_limit>().countdown = tim_limit.GetComponent<Tim_limit>().countdown + 5;
+            coin_update = true;
+        }
+        if (col.gameObject.tag == "Coin_BLACK")
+        {
+            soundSE[0].PlayOneShot(soundSE[0].clip);
+            tim_limit.GetComponent<Tim_limit>().countdown = tim_limit.GetComponent<Tim_limit>().countdown + 15;
+            Coins = Coins + 20;
+            coin_update = true;
+        }
+        if (col.gameObject.tag == "Coin_RED")
+        {
+            soundSE[0].PlayOneShot(soundSE[0].clip);
+            Coins = Coins + 10;
+            tim_limit.GetComponent<Tim_limit>().countdown = tim_limit.GetComponent<Tim_limit>().countdown + 10;
+            coin_update = true;
+
+        }
+
+
+
+        if (col.gameObject.tag == "Goal")///ゴールオブジェクトに触れた場合に実行///11月28日
+        {
+            Right_Weapon.GetComponent<MeshRenderer>().enabled = false;
+            Left_Weapon.GetComponent<MeshRenderer>().enabled = false;
+            GameObject.FindGameObjectWithTag("GameClear_UI_text").GetComponent<Text>().enabled = true;
+            GetComponent<yrun>().enabled = false;
+            animator.SetFloat("is", 0f);
+            animator.SetTrigger("exit");
+            GetComponent<camera_di>().enabled = false;
+            GetComponent<run>().enabled = false;
+            GetComponent<attack_system>().enabled = false;
+            GetComponent<CharacterController>().enabled = false;
+            StartCoroutine("Goal");
+        }
+
+
+
+
+
+    }
+
+
+    ///staticの変数はリザルト画面で使用するために記載している
+    public static int getA()
+    {
+        return Max_kill_count;
+    }
+    public static int getB()
+    {
+        return Max_score_count;
+    }
+    public static int getC()
+    {
+        return Max_Coins;
+    }
+
+
+    public void Player_Time_out()///残り時間が0になった場合
+    {
+        Right_Weapon.GetComponent<MeshRenderer>().enabled = false;
+        Left_Weapon.GetComponent<MeshRenderer>().enabled = false;
+        GameObject.FindGameObjectWithTag("GameOver_UI_text").GetComponent<Text>().enabled = true;
+        GetComponent<CharacterController>().enabled = false;
+        SPlayerHP = 0;
+        GetComponent<yrun>().enabled = false;
+        animator.SetFloat("is", 0f);
+        animator.SetTrigger("exit");
+        animator.SetTrigger("Time_out");
+        GetComponent<camera_di>().enabled = false;
+        GetComponent<run>().enabled = false;
+        GetComponent<attack_system>().enabled = false;
+        StartCoroutine("Player_Death");
+    }
+
+
+
+
+
+    public void Enemys_voice()////敵を攻撃して当たり判定に当たった時、敵のやられ声を発生させる
+    {
+        StartCoroutine("Enemys_voice_decrement");///1秒後にEnemys_voice_countをデクリメントする
+        if (Enemys_voice_count <= 3)////ここで同時に攻撃を受けた時にvoiceが重複する数をコントロールする
+        {
+            soundSE[1].PlayOneShot(soundSE[1].clip);
+
+        }
+        else
+        {
+            /////何もしない
+        }
+
+    }
+
+
+
+    IEnumerator Enemys_voice_decrement()////プレイヤーのHPが0になった場合///
+    {
+        yield return new WaitForSeconds(1f);
+
+        Enemys_voice_count--;
+
+    }
+
+
+
+
+
+
+    public void Enemys_voice_1()////敵が死んだとき
+    {
+        StartCoroutine("Enemys_voice_decrement_1");///1秒後にEnemys_voice_count_1をデクリメントする
+        if (Enemys_voice_count_1 <= 3)////ここで同時に攻撃を受けた時にvoiceが重複する数をコントロールする
+        {
+            int Enemy_death_voice = Random.Range(0, 2);////死亡時のvoiceは2種類あるためここで制御する
+
+            {
+                if (Enemy_death_voice == 0)
+                {
+                    soundSE[2].PlayOneShot(soundSE[2].clip);
+                }
+                else
+                {
+                    soundSE[3].PlayOneShot(soundSE[3].clip);
+                }
+
+                {
+                    /////何もしない
+                }
+
+            }
+        }
+    }
+
+    IEnumerator Enemys_voice_decrement_1()////プレイヤーのHPが0になった場合///
+    {
+        yield return new WaitForSeconds(1f);
+
+        Enemys_voice_count_1--;
+
+    }
+
+
+    IEnumerator Player_Death()////プレイヤーのHPが0になった場合///
+    {
+        yield return new WaitForSeconds(6f);
+
+        SceneManager.LoadScene("ポートフォリオリザルト画面");
+
+    }
+
+    IEnumerator Goal()///3秒後にリザルト画面に移行/// 
+    {
+        yield return new WaitForSeconds(3f);
+
+        SceneManager.LoadScene("ポートフォリオリザルト画面");
+
+    }
+}
