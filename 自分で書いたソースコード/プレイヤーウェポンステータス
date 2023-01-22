@@ -1,0 +1,44 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class weapon_status : MonoBehaviour
+{
+    public int weapon_power = 0;
+    public AudioSource sound01;
+    public AudioSource sound02;
+    public AudioSource sound03;
+    // Start is called before the first frame update
+    void Start()
+    {
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+       
+    }
+
+    void OnTriggerEnter(Collider col)
+    {
+        if (col.gameObject.tag == "enemy")
+        {
+
+            weapon_power = Random.Range(1, 11);
+            int sound_judge= Random.Range(1, 4);
+            if (sound_judge==1)
+            {
+                sound01.PlayOneShot(sound01.clip);
+            }
+            if (sound_judge == 2)
+            {
+                sound02.PlayOneShot(sound02.clip);
+            }
+            if (sound_judge == 3)
+            {
+                sound03.PlayOneShot(sound03.clip);
+            }
+        }
+    }
+}
